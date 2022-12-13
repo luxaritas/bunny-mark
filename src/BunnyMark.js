@@ -36,6 +36,9 @@ class BunnyMark
 
         /** Container for the bunnies */
         this.stage = null;
+        this.view = null;
+        this.splitStageCanvases = [];
+        this.splitStageContexts = [];
 
         /** The stats UI for showing framerate */
         this.stats = null;
@@ -45,6 +48,8 @@ class BunnyMark
 
         /** Container for the counter */
         this.counter = null;
+
+        this.splitCanvas = false;
     }
 
     /** To be called when window and PIXI is ready */
@@ -54,6 +59,16 @@ class BunnyMark
         if (typeof startBunnyCount === 'undefined')
         {
             startBunnyCount = 100000;
+        }
+
+        this.splitCanvas = $('#splitCanvas').prop('checked');
+
+        if (this.splitCanvas)
+        {
+            $('#split-stage').removeClass('hidden');
+        }
+        else {
+            $('#stage').removeClass('hidden');
         }
 
         this.domElement.removeClass('hidden');
@@ -66,6 +81,13 @@ class BunnyMark
 
         const $stage = $('#stage');
         const view = $stage.get(0);
+        // const view = $stage.get(0).transferControlToOffscreen();
+
+        this.view = view;
+        this.splitStageCanvases = $('#split-stage').children().toArray();
+        this.splitStageContexts = this.splitStageCanvases.map(
+            (canvas) => canvas.getContext('bitmaprenderer')
+        );
 
         this.bounds.right = $stage.width();
         this.bounds.bottom = $stage.height();
@@ -92,6 +114,7 @@ class BunnyMark
         try
         {
             this.renderer = PIXI.autoDetectRenderer(options);
+            console.log(this.renderer);
         }
         catch (err)
         {
@@ -240,8 +263,44 @@ class BunnyMark
         }
 
         this.renderer.render(this.stage);
-        this.startUpdate();
-        this.stats.end();
+        if (this.splitCanvas)
+        {
+            /*
+            this.splitStageCanvases = this.splitStageCanvases.map((cnv, idx) => {
+                const canvas = this.renderer.extract.canvas(
+                    this.stage,
+                    new PIXI.Rectangle((idx % 4) * 200, Math.floor(idx / 4) * 200, 200, 200)
+                );
+
+                $(cnv).replaceWith(canvas);
+
+                return canvas;
+            });
+            this.startUpdate();
+            this.stats.end();
+            */
+            /*
+            this.splitStageContexts.forEach((ctx, idx) => {
+                ctx.transferFromImageBitmap(this.view.transferToImageBitmap());
+            });
+            this.startUpdate();
+            this.stats.end();
+            */
+            Promise.all(this.splitStageContexts.map((_, idx) =>
+                createImageBitmap(this.view, (idx % 4) * 200, Math.floor(idx / 4) * 200, 200, 200)
+            )).then((bitmaps) => {
+                this.splitStageContexts.forEach((ctx, idx) => {
+                    ctx.transferFromImageBitmap(bitmaps[idx]);
+                });
+                this.startUpdate();
+                this.stats.end();
+            });
+        }
+        else
+        {
+            this.startUpdate();
+            this.stats.end();
+        }
     }
 }
 
