@@ -45,8 +45,8 @@
                         <div class="col-sm-9 renderer-options d-flex flex-wrap">
                             <div class="w-50 mb-1">
                                 <div class="custom-control custom-checkbox mr-sm-2">
-                                    <input class="custom-control-input" type="checkbox" name="splitCanvas" id="splitCanvas">
-                                    <label class="custom-control-label" for="splitCanvas">Split Canvas</label>
+                                    <input class="form-control border-0" type="number" id="splitCanvas" value="1">
+                                    <label class="form-control-label" for="splitCanvas">Number of virtual canvas rows/columns (1 disables virtual canvases)</label>
                                 </div>
                             </div>
                         </div>
@@ -154,24 +154,7 @@
         <div id="frame" class="center hidden">
             <div class="error center">PIXI is unavailable with this tag or branch.</div>
             <canvas id="stage" width="800" height="800" class="hidden"></canvas>
-            <div id="split-stage" class="hidden" style="font-size: 0; z-index: 0; position: absolute;">
-                <canvas id="stage1" width="200" height="200"></canvas>
-                <canvas id="stage2" width="200" height="200"></canvas>
-                <canvas id="stage3" width="200" height="200"></canvas>
-                <canvas id="stage4" width="200" height="200"></canvas>
-                <canvas id="stage5" width="200" height="200"></canvas>
-                <canvas id="stage6" width="200" height="200"></canvas>
-                <canvas id="stage7" width="200" height="200"></canvas>
-                <canvas id="stage8" width="200" height="200"></canvas>
-                <canvas id="stage9" width="200" height="200"></canvas>
-                <canvas id="stage10" width="200" height="200"></canvas>
-                <canvas id="stage11" width="200" height="200"></canvas>
-                <canvas id="stage12" width="200" height="200"></canvas>
-                <canvas id="stage13" width="200" height="200"></canvas>
-                <canvas id="stage14" width="200" height="200"></canvas>
-                <canvas id="stage15" width="200" height="200"></canvas>
-                <canvas id="stage16" width="200" height="200"></canvas>
-            </div>
+            <div id="split-stage" class="hidden" style="font-size: 0; z-index: 0; position: absolute;"></div>
             <img class="disable" id="logo" src="images/logo_small.png" title="pixi.js" />
             <img class="disable" id="lineup" src="images/lineup.png" />
             <div class="disable" id="counter"></div>

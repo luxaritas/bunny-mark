@@ -49,7 +49,7 @@ class BunnyMark
         /** Container for the counter */
         this.counter = null;
 
-        this.splitCanvas = false;
+        this.splitCanvas = 1;
     }
 
     /** To be called when window and PIXI is ready */
@@ -61,13 +61,14 @@ class BunnyMark
             startBunnyCount = 100000;
         }
 
-        this.splitCanvas = $('#splitCanvas').prop('checked');
+        this.splitCanvas = parseInt($('#splitCanvas').val(), 10);
 
-        if (this.splitCanvas)
+        if (this.splitCanvas > 1)
         {
             $('#split-stage').removeClass('hidden');
         }
-        else {
+        else
+        {
             $('#stage').removeClass('hidden');
         }
 
@@ -84,10 +85,21 @@ class BunnyMark
         // const view = $stage.get(0).transferControlToOffscreen();
 
         this.view = view;
-        this.splitStageCanvases = $('#split-stage').children().toArray();
-        this.splitStageContexts = this.splitStageCanvases.map(
-            (canvas) => canvas.getContext('bitmaprenderer')
-        );
+        this.splitStageCanvases = [];
+        this.splitStageContexts = [];
+        if (this.splitCanvas > 1)
+        {
+            for (let i = 0; i < this.splitCanvas * this.splitCanvas; i++)
+            {
+                const $canvas  = $('<canvas></canvas>');
+
+                $canvas.width(800 / this.splitCanvas);
+                $canvas.height(800 / this.splitCanvas);
+                $('#split-stage').append($canvas);
+                this.splitStageCanvases.push($canvas.get(0));
+                this.splitStageContexts.push($canvas.get(0).getContext('bitmaprenderer'));
+            }
+        }
 
         this.bounds.right = $stage.width();
         this.bounds.bottom = $stage.height();
@@ -263,7 +275,7 @@ class BunnyMark
         }
 
         this.renderer.render(this.stage);
-        if (this.splitCanvas)
+        if (this.splitCanvas > 1)
         {
             /*
             this.splitStageCanvases = this.splitStageCanvases.map((cnv, idx) => {
@@ -286,9 +298,18 @@ class BunnyMark
             this.startUpdate();
             this.stats.end();
             */
+            const chunkSize = (800 / this.splitCanvas);
+
             Promise.all(this.splitStageContexts.map((_, idx) =>
-                createImageBitmap(this.view, (idx % 4) * 200, Math.floor(idx / 4) * 200, 200, 200)
-            )).then((bitmaps) => {
+                createImageBitmap(
+                    this.view,
+                    (idx % this.splitCanvas) * chunkSize,
+                    Math.floor(idx / this.splitCanvas) * chunkSize,
+                    chunkSize,
+                    chunkSize
+                )
+            )).then((bitmaps) =>
+            {
                 this.splitStageContexts.forEach((ctx, idx) => {
                     ctx.transferFromImageBitmap(bitmaps[idx]);
                 });
