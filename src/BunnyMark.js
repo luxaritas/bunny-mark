@@ -50,6 +50,8 @@ class BunnyMark
         this.counter = null;
 
         this.splitCanvas = 1;
+
+        this.splitContextType = '';
     }
 
     /** To be called when window and PIXI is ready */
@@ -89,15 +91,18 @@ class BunnyMark
         this.splitStageContexts = [];
         if (this.splitCanvas > 1)
         {
+            this.splitContextType = $('input[name=splitContextType]:checked').val();
             for (let i = 0; i < this.splitCanvas * this.splitCanvas; i++)
             {
                 const $canvas  = $('<canvas></canvas>');
 
-                $canvas.width(800 / this.splitCanvas);
-                $canvas.height(800 / this.splitCanvas);
+                $canvas.get(0).width = 800 / this.splitCanvas;
+                $canvas.get(0).height = 800 / this.splitCanvas;
                 $('#split-stage').append($canvas);
                 this.splitStageCanvases.push($canvas.get(0));
-                this.splitStageContexts.push($canvas.get(0).getContext('bitmaprenderer'));
+                this.splitStageContexts.push($canvas.get(0).getContext(
+                    this.splitContextType === 'ImageBitmap' ? 'bitmaprenderer' : '2d'
+                ));
             }
         }
 
@@ -126,7 +131,6 @@ class BunnyMark
         try
         {
             this.renderer = PIXI.autoDetectRenderer(options);
-            console.log(this.renderer);
         }
         catch (err)
         {
@@ -300,22 +304,46 @@ class BunnyMark
             */
             const chunkSize = (800 / this.splitCanvas);
 
-            Promise.all(this.splitStageContexts.map((_, idx) =>
-                createImageBitmap(
-                    this.view,
-                    (idx % this.splitCanvas) * chunkSize,
-                    Math.floor(idx / this.splitCanvas) * chunkSize,
-                    chunkSize,
-                    chunkSize
-                )
-            )).then((bitmaps) =>
+            if (this.splitContextType === 'ImageBitmap')
             {
-                this.splitStageContexts.forEach((ctx, idx) => {
-                    ctx.transferFromImageBitmap(bitmaps[idx]);
+                Promise.all(this.splitStageContexts.map((_, idx) =>
+                    createImageBitmap(
+                        this.view,
+                        (idx % this.splitCanvas) * chunkSize,
+                        Math.floor(idx / this.splitCanvas) * chunkSize,
+                        chunkSize,
+                        chunkSize
+                    )
+                )).then((bitmaps) =>
+                {
+                    this.splitStageContexts.forEach((ctx, idx) =>
+                    {
+                        ctx.globalCompositeOperation = 'copy';
+                        ctx.transferFromImageBitmap(bitmaps[idx]);
+                    });
+                    this.startUpdate();
+                    this.stats.end();
+                });
+            }
+            else
+            {
+                this.splitStageContexts.forEach((ctx, idx) =>
+                {
+                    ctx.drawImage(
+                        this.view,
+                        (idx % this.splitCanvas) * chunkSize,
+                        Math.floor(idx / this.splitCanvas) * chunkSize,
+                        chunkSize,
+                        chunkSize,
+                        0,
+                        0,
+                        chunkSize,
+                        chunkSize,
+                    );
                 });
                 this.startUpdate();
                 this.stats.end();
-            });
+            }
         }
         else
         {

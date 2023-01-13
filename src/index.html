@@ -42,12 +42,18 @@
                     <hr>
                     <div class="form-row mb-3">
                         <label class="section col-sm-3">Split Canvas</label>
-                        <div class="col-sm-9 renderer-options d-flex flex-wrap">
-                            <div class="w-50 mb-1">
-                                <div class="custom-control custom-checkbox mr-sm-2">
-                                    <input class="form-control border-0" type="number" id="splitCanvas" value="1">
-                                    <label class="form-control-label" for="splitCanvas">Number of virtual canvas rows/columns (1 disables virtual canvases)</label>
-                                </div>
+                        <div class="col-sm-5">
+                            <input class="form-control border-0" type="number" id="splitCanvas" value="1">
+                            <label class="form-control-label" for="splitCanvas">Number of virtual canvas rows/columns (1 disables virtual canvases)</label>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="splitContextType" id="splitContextTypeIB" value="ImageBitmap" checked>
+                                <label class="form-check-label" for="splitContextTypeIB">Use ImageBitmap context</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="splitContextType" id="splitContextType2D" value="Context2D">
+                                <label class="form-check-label" for="splitContextType2D">Use Canvas2D context</label>
                             </div>
                         </div>
                     </div>
